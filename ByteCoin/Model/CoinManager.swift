@@ -8,8 +8,15 @@
 
 import Foundation
 
+
+protocol CoinManagerDelegate {
+    func didUpdatePrice(price: String, currency: String)
+    func didFailWithError(error: Error)
+}
+
 struct CoinManager {
     
+    var delegate: CoinManagerDelegate?
     let baseURL = "https://rest.coinapi.io/v1/exchangerate/BTC"
     let apiKey = "69F52BC8-F054-4D21-BE36-6543C5EE1904"
     
@@ -27,7 +34,15 @@ struct CoinManager {
                 return
             }
             let dataAsString = String(data: data!, encoding: .utf8)
-            print(dataAsString)
+            let decoder = JSONDecoder()
+            do {
+                let decodeDAta = try decoder.decode(crytoData.self, from: data!)
+                print(decodeDAta)
+                let priceString = String(format: "%.2f", decodeDAta.rate!)
+                self.delegate?.didUpdatePrice(price: priceString, currency: currency)
+            } catch {
+                print("erro decoding")
+            }
         }
         //HAcer la task
         task.resume()

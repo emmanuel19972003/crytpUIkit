@@ -8,25 +8,38 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
+class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate, CoinManagerDelegate {
     
-    let coinManager = CoinManager()
-        
+    
+    var coinManager = CoinManager()
+    
     @IBOutlet weak var bitcoinLabel: UILabel!
     @IBOutlet weak var currencyLabel: UILabel!
     @IBOutlet weak var currencyPiker: UIPickerView!
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        coinManager.delegate = self// lo mismo del piker, el que se va a encargar de decir quien hace las cosas esta misma view
         currencyPiker.dataSource = self// de donde viene la informacion, el self hace referencia a esta clase no al piker, los datos los asigno desde aca == ViewController()
         currencyPiker.delegate = self
     }
-
+    
+    func didUpdatePrice(price: String, currency: String) {
+        DispatchQueue.main.async {
+            self.bitcoinLabel.text = price
+            self.currencyLabel.text = currency
+        }
+    }
+    
+    func didFailWithError(error: Error) {
+        print(error)
+    }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-
+    
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return coinManager.currencyArray.count
     }
@@ -40,6 +53,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         print(coinManager.getCoinPrice(for: selectedCurrency))
         coinManager.getCoinPrice(for: selectedCurrency)
     }//así los eleije, esta coqueto
-
+    
 }
 
